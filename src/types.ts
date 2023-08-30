@@ -1,8 +1,10 @@
-import { Group, Resource, Role } from "./constants";
+export type TLang = "en" | "zh";
 
-export interface IUniwebRequest {
-  url: string;
-}
+export type TRole = 1 | 2 | 3;
+
+export type TGroup = 1;
+
+export type TResource = 1 | 2 | 3 | 4;
 
 export interface IRequestResult<T> {
   status?: number;
@@ -27,7 +29,12 @@ export interface IResultAuthLogin {
     id: string;
     username: string;
     email: string;
-    role: Role;
+    role: TRole;
+  };
+  company: {
+    id: string;
+    name: string;
+    expiredAt: string;
   };
   expires_in: number;
 }
@@ -42,7 +49,7 @@ export interface IResultCreateUser {
   id: string;
   username: string;
   email: string;
-  role: Role;
+  role: TRole;
 }
 
 export interface IRequestUpdateUser {
@@ -84,7 +91,7 @@ export interface IRequestCreateTemplate {
 }
 
 export interface IRequestCreateResource {
-  type: Resource;
+  type: TResource;
   key: string;
   src?: string;
   content?: string;
@@ -94,7 +101,7 @@ export interface IRequestCreateResource {
 
 export interface IRequestCreateGroup {
   parentId: string;
-  type: Group;
+  type: TGroup;
   weight: number;
   resource: IRequestCreateResource[];
 }
@@ -117,7 +124,7 @@ export interface IRequestQueryGroup {
 export interface IResource {
   id: string;
   key: string;
-  type: Resource;
+  type: TResource;
   src: string | null;
   content: string | null;
   document: string | null;
@@ -128,7 +135,7 @@ export interface IResource {
 export interface IGroup {
   id: string;
   key: string | null;
-  type: Group;
+  type: TGroup;
   title: string | null;
   description: string | null;
   struct: string | null;
@@ -155,7 +162,7 @@ export interface IUser {
   id: string;
   username: string;
   email: string;
-  role: Role;
+  role: TRole;
   createdAt: string;
 }
 
