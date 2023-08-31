@@ -1,9 +1,12 @@
 {
-  "name": "@uniweb/service-utils",
+  "name": "@nekovale/uniweb-service-utils",
   "version": "1.0.10",
   "description": "uniweb service utils",
   "author": "Nekovale",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://github.com/nekovale/uniweb-service-utils.git"
+  },
   "types": "build/lib/index.d.ts",
   "main": "build/lib/index.js",
   "module": "build/lib/index.esm.js",
@@ -22,7 +25,7 @@
     "src"
   ],
   "scripts": {
-    "build": "npx rollup -c rollup.config.ts --configPlugin typescript",
+    "build": "tsc --build && npx rollup -c rollup.config.ts --configPlugin typescript",
     "publish-patch": "yarn build && npm version patch && npm publish"
   },
   "dependencies": {
