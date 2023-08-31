@@ -1,3 +1,2 @@
-export { UniwebService, UniwebInstance } from "./service";
-
+export * from "./service";
 export * from "./types";
