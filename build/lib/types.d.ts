@@ -1,7 +1,7 @@
-export type TLang = "en" | "zh";
 export type TRole = 1 | 2 | 3;
 export type TGroup = 1;
 export type TResource = 1 | 2 | 3 | 4;
+export type TUserStatus = 1 | 2;
 export interface IRequestResult<T> {
     status?: number;
     message?: string;
@@ -12,9 +12,8 @@ export interface IRequestResultError {
     message: string;
 }
 export interface IRequestAuthLogin {
-    username: string;
+    email: string;
     password: string;
-    companyId: string;
 }
 export interface IResultAuthLogin {
     access_token: string;
@@ -31,9 +30,12 @@ export interface IResultAuthLogin {
     };
     expires_in: number;
 }
+export interface IRequestAuthVerifyEmail {
+    token: string;
+    password: string;
+}
 export interface IRequestCreateUser {
     username: string;
-    password: string;
     email: string;
 }
 export interface IResultCreateUser {
@@ -45,15 +47,18 @@ export interface IResultCreateUser {
 export interface IRequestUpdateUser {
     id: string;
     username?: string;
-    password?: string;
     email?: string;
 }
 export interface IResultUpdateUser {
     id: string;
     username: string;
     email: string;
+    status: TUserStatus;
 }
 export interface IRequestRemoveUser {
+    id: string;
+}
+export interface IRequestResendVerifyEmail {
     id: string;
 }
 export interface IRequestInitStruct {

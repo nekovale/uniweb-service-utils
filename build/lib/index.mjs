@@ -45,10 +45,6 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
-var Lang = {
-  en: "en",
-  zh: "zh"
-};
 var Role = {
   admin: 1,
   user: 2,
@@ -63,11 +59,14 @@ var Resource = {
   video: 3,
   rich: 4
 };
+var UserStatus = {
+  active: 1,
+  inactive: 2
+};
 var UniwebService = /*#__PURE__*/function () {
   function UniwebService() {
     var _this = this;
     this.url = "";
-    this.lang = Lang.en;
     this.authKey = null;
     this.setAuth = function ({
       key: key
@@ -75,11 +74,9 @@ var UniwebService = /*#__PURE__*/function () {
       _this.authKey = key;
     };
     this.config = function ({
-      url: url,
-      lang: lang
+      url: url
     }) {
       if (url) _this.url = url;
-      if (lang) _this.lang = lang;
     };
     this.auth = {
       login: function () {
@@ -99,7 +96,14 @@ var UniwebService = /*#__PURE__*/function () {
           return _login.apply(this, arguments);
         }
         return login;
-      }()
+      }(),
+      verifyEmail: function verifyEmail(input) {
+        return _this.request({
+          method: "POST",
+          endpoint: "/auth/verify-email",
+          data: input
+        });
+      }
     };
     this.manage = {
       user: {
@@ -128,6 +132,13 @@ var UniwebService = /*#__PURE__*/function () {
           return _this.request({
             method: "GET",
             endpoint: "/manage/list-user"
+          });
+        },
+        resendEmailInvite: function resendEmailInvite(input) {
+          return _this.request({
+            method: "POST",
+            endpoint: "/manage/resend-email-invite",
+            data: input
           });
         }
       },
@@ -248,8 +259,7 @@ var UniwebService = /*#__PURE__*/function () {
         url: endpoint,
         baseURL: this.url,
         headers: _extends({
-          "Content-Type": "application/json",
-          "Accept-Language": this.lang
+          "Content-Type": "application/json"
         }, this.authKey && {
           Authorization: "Bearer " + this.authKey
         }),
@@ -277,5 +287,5 @@ var UniwebService = /*#__PURE__*/function () {
 }();
 var UniwebInstance = new UniwebService();
 
-export { Group, Lang, Resource, Role, UniwebInstance, UniwebService };
+export { Group, Resource, Role, UniwebInstance, UniwebService, UserStatus };
 //# sourceMappingURL=index.mjs.map

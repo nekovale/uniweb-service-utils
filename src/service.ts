@@ -25,16 +25,13 @@ import {
   ITemplate,
   ITemplateValue,
   IUser,
-  TLang,
   TRole,
   TResource,
   TGroup,
+  IRequestAuthVerifyEmail,
+  IRequestResendVerifyEmail,
+  TUserStatus,
 } from "./types";
-
-export const Lang: Record<string, TLang> = {
-  en: "en",
-  zh: "zh",
-};
 
 export const Role: Record<string, TRole> = {
   admin: 1,
@@ -53,9 +50,13 @@ export const Resource: Record<string, TResource> = {
   rich: 4,
 };
 
+export const UserStatus: Record<string, TUserStatus> = {
+  active: 1,
+  inactive: 2,
+};
+
 export class UniwebService {
   private url: string = "";
-  private lang: TLang | undefined = Lang.en;
   private authKey: string | null = null;
 
   constructor() {}
@@ -76,7 +77,6 @@ export class UniwebService {
         baseURL: this.url,
         headers: {
           "Content-Type": "application/json",
-          "Accept-Language": this.lang,
           ...(this.authKey && { Authorization: `Bearer ${this.authKey}` }),
         },
         params: method === "GET" ? data : undefined,
@@ -96,9 +96,8 @@ export class UniwebService {
     this.authKey = key;
   };
 
-  public config = ({ url, lang }: { url?: string; lang?: TLang }) => {
+  public config = ({ url }: { url?: string }) => {
     if (url) this.url = url;
-    if (lang) this.lang = lang;
   };
 
   public auth = {
@@ -111,6 +110,13 @@ export class UniwebService {
       if (result.status === 200 && result.data)
         this.setAuth({ key: result.data?.access_token });
       return result;
+    },
+    verifyEmail: (input: IRequestAuthVerifyEmail) => {
+      return this.request<boolean>({
+        method: "POST",
+        endpoint: "/auth/verify-email",
+        data: input,
+      });
     },
   };
 
@@ -138,6 +144,12 @@ export class UniwebService {
         this.request<IUser[]>({
           method: "GET",
           endpoint: "/manage/list-user",
+        }),
+      resendEmailInvite: (input: IRequestResendVerifyEmail) =>
+        this.request<boolean>({
+          method: "POST",
+          endpoint: "/manage/resend-email-invite",
+          data: input,
         }),
     },
     struct: {

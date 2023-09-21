@@ -1,21 +1,20 @@
-import { IGroup, IRequestAuthLogin, IRequestCreateGroup, IRequestCreateStruct, IRequestCreateTemplate, IRequestCreateTemplateValue, IRequestCreateUser, IRequestInitStruct, IRequestListTemplateValue, IRequestQueryGroup, IRequestRemoveGroup, IRequestRemoveStruct, IRequestRemoveTemplate, IRequestRemoveUser, IRequestResult, IRequestUpdateGroup, IRequestUpdateStruct, IRequestUpdateTemplate, IRequestUpdateUser, IResultAuthLogin, IResultCreateUser, IResultUpdateUser, ITemplate, ITemplateValue, IUser, TLang, TRole, TResource, TGroup } from "./types";
-export declare const Lang: Record<string, TLang>;
+import { IGroup, IRequestAuthLogin, IRequestCreateGroup, IRequestCreateStruct, IRequestCreateTemplate, IRequestCreateTemplateValue, IRequestCreateUser, IRequestInitStruct, IRequestListTemplateValue, IRequestQueryGroup, IRequestRemoveGroup, IRequestRemoveStruct, IRequestRemoveTemplate, IRequestRemoveUser, IRequestResult, IRequestUpdateGroup, IRequestUpdateStruct, IRequestUpdateTemplate, IRequestUpdateUser, IResultAuthLogin, IResultCreateUser, IResultUpdateUser, ITemplate, ITemplateValue, IUser, TRole, TResource, TGroup, IRequestAuthVerifyEmail, IRequestResendVerifyEmail, TUserStatus } from "./types";
 export declare const Role: Record<string, TRole>;
 export declare const Group: Record<string, TGroup>;
 export declare const Resource: Record<string, TResource>;
+export declare const UserStatus: Record<string, TUserStatus>;
 export declare class UniwebService {
     private url;
-    private lang;
     private authKey;
     constructor();
     private request;
     private setAuth;
-    config: ({ url, lang }: {
+    config: ({ url }: {
         url?: string | undefined;
-        lang?: TLang | undefined;
     }) => void;
     auth: {
         login: (input: IRequestAuthLogin) => Promise<IRequestResult<IResultAuthLogin>>;
+        verifyEmail: (input: IRequestAuthVerifyEmail) => Promise<IRequestResult<boolean>>;
     };
     manage: {
         user: {
@@ -23,6 +22,7 @@ export declare class UniwebService {
             update: (input: IRequestUpdateUser) => Promise<IRequestResult<IResultUpdateUser>>;
             remove: (input: IRequestRemoveUser) => Promise<IRequestResult<boolean>>;
             list: () => Promise<IRequestResult<IUser[]>>;
+            resendEmailInvite: (input: IRequestResendVerifyEmail) => Promise<IRequestResult<boolean>>;
         };
         struct: {
             init: (input: IRequestInitStruct) => Promise<IRequestResult<boolean>>;
