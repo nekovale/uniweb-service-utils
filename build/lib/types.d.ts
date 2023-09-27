@@ -14,6 +14,7 @@ export interface IRequestResultError {
 export interface IRequestAuthLogin {
     email: string;
     password: string;
+    captchaVerifyParam: string;
 }
 export interface IResultAuthLogin {
     access_token: string;

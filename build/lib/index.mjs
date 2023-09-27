@@ -271,10 +271,11 @@ var UniwebService = /*#__PURE__*/function () {
           data: res.data
         };
       })["catch"](function (err) {
-        var _err$response, _err$response2;
+        var _err$response, _err$response2, _err$response3;
         return {
           status: (_err$response = err.response) == null ? void 0 : _err$response.status,
-          message: (_err$response2 = err.response) == null ? void 0 : _err$response2.data.message
+          errors: (_err$response2 = err.response) == null ? void 0 : _err$response2.data.errors,
+          message: (_err$response3 = err.response) == null ? void 0 : _err$response3.data.message
         };
       });
     });

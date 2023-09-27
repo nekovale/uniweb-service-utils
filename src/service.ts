@@ -88,6 +88,7 @@ export class UniwebService {
       }))
       .catch((err) => ({
         status: err.response?.status,
+        errors: err.response?.data.errors,
         message: err.response?.data.message,
       }));
   }
