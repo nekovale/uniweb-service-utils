@@ -7,7 +7,6 @@ import {
   IRequestCreateTemplate,
   IRequestCreateTemplateValue,
   IRequestCreateUser,
-  IRequestInitStruct,
   IRequestListTemplateValue,
   IRequestQueryGroup,
   IRequestRemoveGroup,
@@ -31,6 +30,15 @@ import {
   IRequestAuthVerifyEmail,
   IRequestResendVerifyEmail,
   TUserStatus,
+  IRequestResetPassword,
+  IRequestSetPassword,
+  IRequestWeightStruct,
+  IResultGetUploadUrl,
+  IRequestCreatePublish,
+  IPublish,
+  IRequestQueryPublish,
+  IRequestCancelPublish,
+  TPublishStatus,
 } from "./types";
 
 export const Role: Record<string, TRole> = {
@@ -48,6 +56,7 @@ export const Resource: Record<string, TResource> = {
   image: 2,
   video: 3,
   rich: 4,
+  number: 5,
 };
 
 export const UserStatus: Record<string, TUserStatus> = {
@@ -55,8 +64,15 @@ export const UserStatus: Record<string, TUserStatus> = {
   inactive: 2,
 };
 
+export const PublishStatus: Record<string, TPublishStatus> = {
+  progress: 0,
+  finished: 1,
+  canceled: 2,
+};
+
 export class UniwebService {
   private url: string = "";
+  private lang: string = "en";
   private authKey: string | null = null;
 
   constructor() {}
@@ -77,6 +93,7 @@ export class UniwebService {
         baseURL: this.url,
         headers: {
           "Content-Type": "application/json",
+          ...(this.lang && { "Accept-Language": this.lang }),
           ...(this.authKey && { Authorization: `Bearer ${this.authKey}` }),
         },
         params: method === "GET" ? data : undefined,
@@ -97,8 +114,18 @@ export class UniwebService {
     this.authKey = key;
   };
 
-  public config = ({ url }: { url?: string }) => {
+  public config = ({
+    url,
+    lang,
+    key,
+  }: {
+    url?: string;
+    lang?: string;
+    key?: string;
+  }) => {
     if (url) this.url = url;
+    if (lang) this.lang = lang;
+    if (key) this.authKey = key;
   };
 
   public auth = {
@@ -112,16 +139,109 @@ export class UniwebService {
         this.setAuth({ key: result.data?.access_token });
       return result;
     },
-    verifyEmail: (input: IRequestAuthVerifyEmail) => {
-      return this.request<boolean>({
+    verifyEmail: async (input: IRequestAuthVerifyEmail) => {
+      const result = await this.request<IResultAuthLogin>({
         method: "POST",
         endpoint: "/auth/verify-email",
+        data: input,
+      });
+      if (result.status === 200 && result.data)
+        this.setAuth({ key: result.data?.access_token });
+      return result;
+    },
+    resetPassword: (input: IRequestResetPassword) => {
+      return this.request<boolean>({
+        method: "POST",
+        endpoint: "/auth/reset-password",
+        data: input,
+      });
+    },
+    setPassword: (input: IRequestSetPassword) => {
+      return this.request<boolean>({
+        method: "POST",
+        endpoint: "/auth/set-password",
         data: input,
       });
     },
   };
 
   public manage = {
+    oss: {
+      upload: async (file: File) => {
+        const result = await this.request<IResultGetUploadUrl>({
+          method: "GET",
+          endpoint: "/manage/get-upload-url",
+        });
+        if (result && result.data) {
+          const fileKey = `${result.data.key}.${file.name.split(".").pop()}`;
+          const formData = new FormData();
+          formData.append("key", fileKey);
+          formData.append("policy", result.data.policy);
+          formData.append("OSSAccessKeyId", result.data.accessid);
+          formData.append("success_action_status", "200");
+          formData.append("Signature", result.data.signature);
+          formData.append("file", file);
+          const upload = await axios.request({
+            method: "POST",
+            url: result.data.host,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            data: formData,
+          });
+
+          if (upload.status === 200) {
+            return {
+              status: 200,
+              data: {
+                host: result.data.host,
+                key: fileKey,
+              },
+            };
+          } else {
+            return {
+              status: upload.status,
+              message: upload.statusText,
+            };
+          }
+        } else {
+          return {
+            status: 500,
+            message: "Internal Server Error",
+          };
+        }
+      },
+    },
+    publish: {
+      create: (input: IRequestCreatePublish) =>
+        this.request<boolean>({
+          method: "POST",
+          endpoint: "/manage/create-publish",
+          data: input,
+        }),
+      list: () =>
+        this.request<IPublish[]>({
+          method: "GET",
+          endpoint: "/manage/list-publish",
+        }),
+      get: (input: IRequestQueryPublish) =>
+        this.request<IPublish>({
+          method: "GET",
+          endpoint: "/query/publish",
+          data: input,
+        }),
+      cancel: (input: IRequestCancelPublish) =>
+        this.request<boolean>({
+          method: "POST",
+          endpoint: "/manage/cancel-publish",
+          data: input,
+        }),
+      validate: () =>
+        this.request<string>({
+          method: "GET",
+          endpoint: "/manage/validate-publish",
+        }),
+    },
     user: {
       create: (input: IRequestCreateUser) =>
         this.request<IResultCreateUser>({
@@ -154,10 +274,10 @@ export class UniwebService {
         }),
     },
     struct: {
-      init: (input: IRequestInitStruct) =>
+      weight: (input: IRequestWeightStruct) =>
         this.request<boolean>({
           method: "POST",
-          endpoint: "/manage/init-struct",
+          endpoint: "/manage/weight-struct",
           data: input,
         }),
       create: (input: IRequestCreateStruct) =>
@@ -217,6 +337,12 @@ export class UniwebService {
         }),
     },
     group: {
+      weight: (input: IRequestWeightStruct) =>
+        this.request<boolean>({
+          method: "POST",
+          endpoint: "/mutation/weight-group",
+          data: input,
+        }),
       create: (input: IRequestCreateGroup) =>
         this.request<boolean>({
           method: "POST",
@@ -238,7 +364,7 @@ export class UniwebService {
       get: (input: IRequestQueryGroup) =>
         this.request<IGroup[]>({
           method: "GET",
-          endpoint: "/query/group",
+          endpoint: "/manage/list-group",
           data: input,
         }),
     },

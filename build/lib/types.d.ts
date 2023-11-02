@@ -1,15 +1,32 @@
 export type TRole = 1 | 2 | 3;
 export type TGroup = 1;
-export type TResource = 1 | 2 | 3 | 4;
+export type TResource = 1 | 2 | 3 | 4 | 5;
 export type TUserStatus = 1 | 2;
+export type TPublishStatus = 0 | 1 | 2;
+export interface IRequestResultError {
+    property: string;
+    constraints: {
+        [key: string]: string;
+    };
+}
 export interface IRequestResult<T> {
     status?: number;
     message?: string;
+    errors?: IRequestResultError[];
     data?: T;
 }
-export interface IRequestResultError {
-    statusCode: number;
-    message: string;
+export interface IRequestCreatePublish {
+    name: string;
+}
+export interface IRequestCancelPublish {
+    id: string;
+}
+export interface IPublish {
+    id: string;
+    name: string;
+    createdAt: string;
+    struct?: string;
+    status: TPublishStatus;
 }
 export interface IRequestAuthLogin {
     email: string;
@@ -32,6 +49,14 @@ export interface IResultAuthLogin {
     expires_in: number;
 }
 export interface IRequestAuthVerifyEmail {
+    token: string;
+    password: string;
+}
+export interface IRequestResetPassword {
+    email: string;
+    captchaVerifyParam: string;
+}
+export interface IRequestSetPassword {
     token: string;
     password: string;
 }
@@ -62,8 +87,11 @@ export interface IRequestRemoveUser {
 export interface IRequestResendVerifyEmail {
     id: string;
 }
-export interface IRequestInitStruct {
-    struct: string;
+export interface IRequestWeightStruct {
+    input: {
+        id: string;
+        weight: number;
+    }[];
 }
 export interface IRequestCreateStruct {
     struct: string;
@@ -88,20 +116,31 @@ export interface IRequestCreateResource {
 }
 export interface IRequestCreateGroup {
     parentId: string;
-    type: TGroup;
-    weight: number;
+    key?: string;
+    type?: TGroup;
+    weight?: number;
     resource: IRequestCreateResource[];
+}
+export interface IResultGetUploadUrl {
+    expire: string;
+    policy: string;
+    signature: string;
+    accessid: string;
+    host: string;
+    key: string;
 }
 export interface IRequestUpdateGroup {
     id: string;
-    weight: number;
-    resource: IRequestCreateResource[];
+    weight?: number;
+    resource?: IRequestCreateResource[];
 }
 export interface IRequestRemoveGroup {
     id: string;
 }
 export interface IRequestQueryGroup {
     key?: string;
+}
+export interface IRequestQueryPublish {
     companyId: string;
 }
 export interface IResource {
@@ -125,6 +164,7 @@ export interface IGroup {
     trunk: boolean;
     resource: IResource[];
     createdAt: string;
+    children: IGroup[];
 }
 export interface ITemplateValue {
     id: string;

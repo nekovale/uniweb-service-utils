@@ -57,16 +57,23 @@ var Resource = {
   text: 1,
   image: 2,
   video: 3,
-  rich: 4
+  rich: 4,
+  number: 5
 };
 var UserStatus = {
   active: 1,
   inactive: 2
 };
+var PublishStatus = {
+  progress: 0,
+  finished: 1,
+  canceled: 2
+};
 var UniwebService = /*#__PURE__*/function () {
   function UniwebService() {
     var _this = this;
     this.url = "";
+    this.lang = "en";
     this.authKey = null;
     this.setAuth = function ({
       key: key
@@ -74,9 +81,13 @@ var UniwebService = /*#__PURE__*/function () {
       _this.authKey = key;
     };
     this.config = function ({
-      url: url
+      url: url,
+      lang: lang,
+      key: key
     }) {
       if (url) _this.url = url;
+      if (lang) _this.lang = lang;
+      if (key) _this.authKey = key;
     };
     this.auth = {
       login: function () {
@@ -97,15 +108,126 @@ var UniwebService = /*#__PURE__*/function () {
         }
         return login;
       }(),
-      verifyEmail: function verifyEmail(input) {
+      verifyEmail: function () {
+        var _verifyEmail = _asyncToGenerator(function* (input) {
+          var _result$data2;
+          var result = yield _this.request({
+            method: "POST",
+            endpoint: "/auth/verify-email",
+            data: input
+          });
+          if (result.status === 200 && result.data) _this.setAuth({
+            key: (_result$data2 = result.data) == null ? void 0 : _result$data2.access_token
+          });
+          return result;
+        });
+        function verifyEmail(_x2) {
+          return _verifyEmail.apply(this, arguments);
+        }
+        return verifyEmail;
+      }(),
+      resetPassword: function resetPassword(input) {
         return _this.request({
           method: "POST",
-          endpoint: "/auth/verify-email",
+          endpoint: "/auth/reset-password",
+          data: input
+        });
+      },
+      setPassword: function setPassword(input) {
+        return _this.request({
+          method: "POST",
+          endpoint: "/auth/set-password",
           data: input
         });
       }
     };
     this.manage = {
+      oss: {
+        upload: function () {
+          var _upload = _asyncToGenerator(function* (file) {
+            var result = yield _this.request({
+              method: "GET",
+              endpoint: "/manage/get-upload-url"
+            });
+            if (result && result.data) {
+              var fileKey = result.data.key + "." + file.name.split(".").pop();
+              var formData = new FormData();
+              formData.append("key", fileKey);
+              formData.append("policy", result.data.policy);
+              formData.append("OSSAccessKeyId", result.data.accessid);
+              formData.append("success_action_status", "200");
+              formData.append("Signature", result.data.signature);
+              formData.append("file", file);
+              var _upload2 = yield axios.request({
+                method: "POST",
+                url: result.data.host,
+                headers: {
+                  "Content-Type": "multipart/form-data"
+                },
+                data: formData
+              });
+              if (_upload2.status === 200) {
+                return {
+                  status: 200,
+                  data: {
+                    host: result.data.host,
+                    key: fileKey
+                  }
+                };
+              } else {
+                return {
+                  status: _upload2.status,
+                  message: _upload2.statusText
+                };
+              }
+            } else {
+              return {
+                status: 500,
+                message: "Internal Server Error"
+              };
+            }
+          });
+          function upload(_x3) {
+            return _upload.apply(this, arguments);
+          }
+          return upload;
+        }()
+      },
+      publish: {
+        create: function create(input) {
+          return _this.request({
+            method: "POST",
+            endpoint: "/manage/create-publish",
+            data: input
+          });
+        },
+        list: function list() {
+          return _this.request({
+            method: "GET",
+            endpoint: "/manage/list-publish"
+          });
+        },
+        get: function get(input) {
+          return _this.request({
+            method: "GET",
+            endpoint: "/query/publish",
+            data: input
+          });
+        },
+        cancel: function cancel(input) {
+          return _this.request({
+            method: "POST",
+            endpoint: "/manage/cancel-publish",
+            data: input
+          });
+        },
+        validate: function validate() {
+          return _this.request({
+            method: "GET",
+            endpoint: "/manage/validate-publish"
+          });
+        }
+      },
       user: {
         create: function create(input) {
           return _this.request({
@@ -143,10 +265,10 @@ var UniwebService = /*#__PURE__*/function () {
         }
       },
       struct: {
-        init: function init(input) {
+        weight: function weight(input) {
           return _this.request({
             method: "POST",
-            endpoint: "/manage/init-struct",
+            endpoint: "/manage/weight-struct",
             data: input
           });
         },
@@ -216,6 +338,13 @@ var UniwebService = /*#__PURE__*/function () {
         }
       },
       group: {
+        weight: function weight(input) {
+          return _this.request({
+            method: "POST",
+            endpoint: "/mutation/weight-group",
+            data: input
+          });
+        },
         create: function create(input) {
           return _this.request({
             method: "POST",
@@ -240,7 +369,7 @@ var UniwebService = /*#__PURE__*/function () {
         get: function get(input) {
           return _this.request({
             method: "GET",
-            endpoint: "/query/group",
+            endpoint: "/manage/list-group",
             data: input
           });
         }
@@ -260,6 +389,8 @@ var UniwebService = /*#__PURE__*/function () {
         baseURL: this.url,
         headers: _extends({
           "Content-Type": "application/json"
+        }, this.lang && {
+          "Accept-Language": this.lang
         }, this.authKey && {
           Authorization: "Bearer " + this.authKey
         }),
@@ -279,7 +410,7 @@ var UniwebService = /*#__PURE__*/function () {
         };
       });
     });
-    function request(_x2) {
+    function request(_x4) {
       return _request.apply(this, arguments);
     }
     return request;
@@ -288,5 +419,5 @@ var UniwebService = /*#__PURE__*/function () {
 }();
 var UniwebInstance = new UniwebService();
 
-export { Group, Resource, Role, UniwebInstance, UniwebService, UserStatus };
+export { Group, PublishStatus, Resource, Role, UniwebInstance, UniwebService, UserStatus };
 //# sourceMappingURL=index.mjs.map
