@@ -39,6 +39,8 @@ import {
   IRequestQueryPublish,
   IRequestCancelPublish,
   TPublishStatus,
+  IRequestRepublish,
+  IPagingResult,
 } from "./types";
 
 export const Role: Record<string, TRole> = {
@@ -241,6 +243,12 @@ export class UniwebService {
           method: "GET",
           endpoint: "/manage/validate-publish",
         }),
+      republish: (input: IRequestRepublish) =>
+        this.request<boolean>({
+          method: "POST",
+          endpoint: "/manage/republish",
+          data: input,
+        }),
     },
     user: {
       create: (input: IRequestCreateUser) =>
@@ -324,7 +332,7 @@ export class UniwebService {
           endpoint: "/manage/list-template",
         }),
       listValue: (input: IRequestListTemplateValue) =>
-        this.request<ITemplateValue[]>({
+        this.request<IPagingResult<ITemplateValue>>({
           method: "GET",
           endpoint: "/manage/list-template-value",
           data: input,

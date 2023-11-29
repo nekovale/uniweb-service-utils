@@ -226,6 +226,13 @@ var UniwebService = /*#__PURE__*/function () {
             method: "GET",
             endpoint: "/manage/validate-publish"
           });
+        },
+        republish: function republish(input) {
+          return _this.request({
+            method: "POST",
+            endpoint: "/manage/republish",
+            data: input
+          });
         }
       },
       user: {

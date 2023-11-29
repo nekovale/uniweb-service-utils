@@ -15,11 +15,19 @@ export interface IRequestResult<T> {
     errors?: IRequestResultError[];
     data?: T;
 }
+export interface IPagingResult<T> {
+    total: number;
+    records: T[];
+}
 export interface IRequestCreatePublish {
     name: string;
 }
 export interface IRequestCancelPublish {
     id: string;
+}
+export interface IRequestRepublish {
+    id: string;
+    name: string;
 }
 export interface IPublish {
     id: string;
@@ -104,6 +112,8 @@ export interface IRequestRemoveStruct {
 }
 export interface IRequestCreateTemplate {
     key: string;
+    title: string;
+    description?: string;
     template: string;
 }
 export interface IRequestCreateResource {
@@ -174,6 +184,8 @@ export interface ITemplateValue {
 export interface ITemplate {
     id: string;
     key: string;
+    title: string;
+    description: string;
     template: string;
     createdAt: string;
 }
@@ -195,10 +207,13 @@ export interface IRequestCreateTemplateValue {
     companyId: string;
 }
 export interface IRequestUpdateTemplate {
-    key: string;
-    template: string;
+    id: string;
+    key?: string;
+    title?: string;
+    description?: string;
+    template?: string;
 }
 export interface IRequestRemoveTemplate {
-    key: string;
+    id: string;
 }
 //# sourceMappingURL=types.d.ts.map

@@ -1,4 +1,4 @@
-import { IGroup, IRequestAuthLogin, IRequestCreateGroup, IRequestCreateStruct, IRequestCreateTemplate, IRequestCreateTemplateValue, IRequestCreateUser, IRequestListTemplateValue, IRequestQueryGroup, IRequestRemoveGroup, IRequestRemoveStruct, IRequestRemoveTemplate, IRequestRemoveUser, IRequestResult, IRequestUpdateGroup, IRequestUpdateStruct, IRequestUpdateTemplate, IRequestUpdateUser, IResultAuthLogin, IResultCreateUser, IResultUpdateUser, ITemplate, ITemplateValue, IUser, TRole, TResource, TGroup, IRequestAuthVerifyEmail, IRequestResendVerifyEmail, TUserStatus, IRequestResetPassword, IRequestSetPassword, IRequestWeightStruct, IRequestCreatePublish, IPublish, IRequestQueryPublish, IRequestCancelPublish, TPublishStatus } from "./types";
+import { IGroup, IRequestAuthLogin, IRequestCreateGroup, IRequestCreateStruct, IRequestCreateTemplate, IRequestCreateTemplateValue, IRequestCreateUser, IRequestListTemplateValue, IRequestQueryGroup, IRequestRemoveGroup, IRequestRemoveStruct, IRequestRemoveTemplate, IRequestRemoveUser, IRequestResult, IRequestUpdateGroup, IRequestUpdateStruct, IRequestUpdateTemplate, IRequestUpdateUser, IResultAuthLogin, IResultCreateUser, IResultUpdateUser, ITemplate, ITemplateValue, IUser, TRole, TResource, TGroup, IRequestAuthVerifyEmail, IRequestResendVerifyEmail, TUserStatus, IRequestResetPassword, IRequestSetPassword, IRequestWeightStruct, IRequestCreatePublish, IPublish, IRequestQueryPublish, IRequestCancelPublish, TPublishStatus, IRequestRepublish, IPagingResult } from "./types";
 export declare const Role: Record<string, TRole>;
 export declare const Group: Record<string, TGroup>;
 export declare const Resource: Record<string, TResource>;
@@ -43,6 +43,7 @@ export declare class UniwebService {
             get: (input: IRequestQueryPublish) => Promise<IRequestResult<IPublish>>;
             cancel: (input: IRequestCancelPublish) => Promise<IRequestResult<boolean>>;
             validate: () => Promise<IRequestResult<string>>;
+            republish: (input: IRequestRepublish) => Promise<IRequestResult<boolean>>;
         };
         user: {
             create: (input: IRequestCreateUser) => Promise<IRequestResult<IResultCreateUser>>;
@@ -62,7 +63,7 @@ export declare class UniwebService {
             update: (input: IRequestUpdateTemplate) => Promise<IRequestResult<boolean>>;
             remove: (input: IRequestRemoveTemplate) => Promise<IRequestResult<boolean>>;
             list: () => Promise<IRequestResult<ITemplate[]>>;
-            listValue: (input: IRequestListTemplateValue) => Promise<IRequestResult<ITemplateValue[]>>;
+            listValue: (input: IRequestListTemplateValue) => Promise<IRequestResult<IPagingResult<ITemplateValue>>>;
             createValue: (input: IRequestCreateTemplateValue) => Promise<IRequestResult<boolean>>;
         };
         group: {
